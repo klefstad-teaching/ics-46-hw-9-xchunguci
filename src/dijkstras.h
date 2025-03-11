@@ -9,6 +9,11 @@ using namespace std;
 
 constexpr int INF = numeric_limits<int>::max();
 
+struct Node {
+    int vertex;
+    int weight;
+};
+
 struct Edge {
     int src=0;
     int dst=0;
@@ -27,6 +32,16 @@ struct Edge {
 
 struct Graph : public vector<vector<Edge>> {
     int numVertices=0;
+    vector<int> distance;
+    vector<int> previous;
+    vector<bool> visited;
+
+    Graph(int nVertices) {
+        numVertices = nVertices;
+        distance.assign(nVertices, INF);
+        previous.assign(nVertices, -1);
+        previous.assign(nVertices, false);
+    }
 };
 
 inline istream& operator>>(istream& in, Graph& G) {
