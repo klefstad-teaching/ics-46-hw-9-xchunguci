@@ -35,13 +35,6 @@ struct Graph : public vector<vector<Edge>> {
     vector<int> distance;
     vector<int> previous;
     vector<bool> visited;
-
-    Graph(int nVertices) {
-        numVertices = nVertices;
-        distance.assign(nVertices, INF);
-        previous.assign(nVertices, -1);
-        previous.assign(nVertices, false);
-    }
 };
 
 inline istream& operator>>(istream& in, Graph& G) {
