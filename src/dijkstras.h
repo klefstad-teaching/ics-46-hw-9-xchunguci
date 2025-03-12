@@ -4,6 +4,7 @@
 #include <queue>
 #include <limits>
 #include <stack>
+#include <algorithm>
 
 using namespace std;
 
@@ -32,9 +33,6 @@ struct Edge {
 
 struct Graph : public vector<vector<Edge>> {
     int numVertices=0;
-    vector<int> distance;
-    vector<int> previous;
-    vector<bool> visited;
 };
 
 inline istream& operator>>(istream& in, Graph& G) {
