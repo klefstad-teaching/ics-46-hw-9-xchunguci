@@ -62,6 +62,6 @@ void print_path(const vector<int>& v, int total) {
   for (int n : v) {
     std::cout << n << ' ';
   }
-  std::cout << "\nTotal cost is " << total;
+  std::cout << "\nTotal cost is " << total << '\n';
 }
 

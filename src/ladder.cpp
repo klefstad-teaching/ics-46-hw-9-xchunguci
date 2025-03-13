@@ -24,13 +24,11 @@ void load_words(set<string>& word_list, const string& file_name) {
 
 void print_word_ladder(const vector<string>& ladder) {
     if (ladder.empty()) {
-        std::cout << "Empty word ladder." << endl;
+        std::cout << "No word ladder found.\n" << endl;
         return;
     }
     for (size_t i = 0; i < ladder.size(); i++) {
-        cout << ladder[i];
-        if (i != ladder.size() - 1)
-            cout << " -> ";
+        cout << ladder[i] << '\n';
     }
     cout << endl;
 }
@@ -88,14 +86,14 @@ bool edit_distance_within(const string& str1, const string& str2, int d) {
 
 bool is_adjacent(const string& word1, const string& word2) {
     if (word1 == word2)
-        return false;
+        return true;
     
     return edit_distance_within(word1, word2, 1);
 }
 
 vector<string> generate_word_ladder(const string& begin_word, const string& end_word, const set<string>& word_list) {
     
-    if (begin_word == end_word) return vector<string>{begin_word};
+    if (begin_word == end_word) return vector<string>{};
 
     queue<vector<string>> ladder_queue;
     
