@@ -133,28 +133,11 @@ bool is_adjacent(const string& word1, const string& word2) {
     return edit_distance_within(word1, word2, 1);
 }
 
-static vector<string> get_candidates(const string &last_word, const unordered_map<int, vector<string>>& words_by_length) {
-    vector<string> candidates;
-    for (size_t len = last_word.size() - 1; len <= last_word.size() + 1; ++len) {
-        if (words_by_length.find(len) != words_by_length.end()) {
-            for (const string &w : words_by_length.at(len))
-                candidates.push_back(w);
-        }
-    }
-    sort(candidates.begin(), candidates.end(), [last_word](const string &a, const string &b) {
-        int diffA = abs((int)a.size() - (int)last_word.size());
-        int diffB = abs((int)b.size() - (int)last_word.size());
-        if (diffA == diffB)
-            return a < b;
-        return diffA < diffB;
-    });
-    return candidates;
-}
-
 vector<string> generate_word_ladder(const string& begin_word, const string& end_word, const set<string>& word_list) {
     if (begin_word == end_word)
         return vector<string>{};
 
+    // Build mapping from word length to words.
     unordered_map<int, vector<string>> words_by_length;
     for (const string& word : word_list)
         words_by_length[word.size()].push_back(word);
@@ -169,7 +152,20 @@ vector<string> generate_word_ladder(const string& begin_word, const string& end_
         ladder_queue.pop();
         string last_word = ladder.back();
 
-        vector<string> candidates = get_candidates(last_word, words_by_length);
+        vector<string> candidates;
+        if (words_by_length.find(last_word.size()) != words_by_length.end()) {
+            for (const string &w : words_by_length.at(last_word.size()))
+                candidates.push_back(w);
+        }
+        if (words_by_length.find(last_word.size() - 1) != words_by_length.end()) {
+            for (const string &w : words_by_length.at(last_word.size() - 1))
+                candidates.push_back(w);
+        }
+        if (words_by_length.find(last_word.size() + 1) != words_by_length.end()) {
+            for (const string &w : words_by_length.at(last_word.size() + 1))
+                candidates.push_back(w);
+        }
+
         for (const string &word : candidates) {
             if (is_adjacent(last_word, word)) {
                 if (visited.find(word) == visited.end()) {
