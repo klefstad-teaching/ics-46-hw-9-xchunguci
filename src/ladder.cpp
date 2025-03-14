@@ -1,5 +1,6 @@
 #include "ladder.h"
 #include <unordered_map>
+#include <climits>
 
 void error(string word1, string word2, string msg) {
   std::cout << word1 << " and " <<  word2 << " " << msg;
@@ -24,9 +25,11 @@ void load_words(set<string>& word_list, const string& file_name) {
 
 void print_word_ladder(const vector<string>& ladder) {
     if (ladder.empty()) {
-        std::cout << "No word ladder found.\n" << endl;
+        std::cout << "No word ladder found.\n";
         return;
     }
+
+    cout << "Word ladder found: ";
     for (size_t i = 0; i < ladder.size(); i++) {
         cout << ladder[i] << ' ';
     }
@@ -54,34 +57,73 @@ void verify_word_ladder() {
 
 }
 
+static bool edit_distance_equal_length_within(const string& s1, const string& s2, int d) {
+    int diff = 0;
+    for (size_t i = 0; i < s1.size(); i++) {
+        if (s1[i] != s2[i]) {
+            diff++;
+            if (diff > d)
+                return false;
+        }
+    }
+    return diff <= d;
+}
+
+static bool edit_distance_length_diff_one_within(const string& shorter, const string& longer) {
+    int i = 0, j = 0;
+    bool diffFound = false;
+    while (i < static_cast<int>(shorter.size()) && j < static_cast<int>(longer.size())) {
+        if (shorter[i] != longer[j]) {
+            if (diffFound)
+                return false;
+            diffFound = true;
+            j++; // skip one char in longer
+        } else {
+            i++; j++;
+        }
+    }
+    return true;
+}
+
+static bool dp_edit_distance_within(const string& str1, const string& str2, int d) {
+    int n = str1.size(), m = str2.size();
+    vector<vector<int>> dp(n + 1, vector<int>(m + 1, 0));
+    for (int i = 0; i <= n; i++)
+        dp[i][0] = i;
+    for (int j = 0; j <= m; j++)
+        dp[0][j] = j;
+    for (int i = 1; i <= n; i++) {
+        int rowMin = INT_MAX;
+        for (int j = 1; j <= m; j++) {
+            if (str1[i - 1] == str2[j - 1])
+                dp[i][j] = dp[i - 1][j - 1];
+            else
+                dp[i][j] = 1 + min({ dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1] });
+            rowMin = min(rowMin, dp[i][j]);
+        }
+        if (rowMin > d)
+            return false;
+    }
+    return dp[n][m] <= d;
+}
+
 bool edit_distance_within(const string& str1, const string& str2, int d) {
     int n = str1.size();
     int m = str2.size();
-
-    if (abs(n - m) > d) return false;
-    vector<vector<int>> dp(n + 1, vector<int>(m + 1, 0));
-
-    for (int i = 0; i <= n; i++) {
-        dp[i][0] = i;
-    }
-    for (int j = 0; j <= m; j++) {
-        dp[0][j] = j;
-    }
-
-    for (int i = 1; i <= n; i++) {
-        for (int j = 1; j <= m; j++) {
-            if (str1[i - 1] == str2[j - 1]) {
-                dp[i][j] = dp[i - 1][j - 1]; 
-            } else {
-                // choose min cost
-                dp[i][j] = 1 + min({ dp[i - 1][j],      // deletion
-                                     dp[i][j - 1],      // insertion
-                                     dp[i - 1][j - 1] }); // substitution
-            }
+    if (abs(n - m) > d)
+        return false;
+    if (d == 0)
+        return str1 == str2;
+    if (d == 1) {
+        if (n == m)
+            return edit_distance_equal_length_within(str1, str2, 1);
+        else {
+            const string& shorter = (n < m ? str1 : str2);
+            const string& longer  = (n < m ? str2 : str1);
+            return edit_distance_length_diff_one_within(shorter, longer);
         }
     }
-    
-    return dp[n][m] <= d;
+    return dp_edit_distance_within(str1, str2, d);
 }
 
 bool is_adjacent(const string& word1, const string& word2) {
