@@ -133,34 +133,38 @@ bool is_adjacent(const string& word1, const string& word2) {
     return edit_distance_within(word1, word2, 1);
 }
 
+static vector<string> get_candidates(const string &last_word, const set<string>& word_list) {
+    vector<string> candidates;
+    for (const string &word : word_list) {
+        if (abs((int)word.size() - (int)last_word.size()) <= 1)
+            candidates.push_back(word);
+    }
+    sort(candidates.begin(), candidates.end(), [last_word](const string &a, const string &b) {
+        int diffA = abs((int)a.size() - (int)last_word.size());
+        int diffB = abs((int)b.size() - (int)last_word.size());
+        if (diffA == diffB)
+            return a < b;
+        return diffA < diffB;
+    });
+    return candidates;
+}
+
 vector<string> generate_word_ladder(const string& begin_word, const string& end_word, const set<string>& word_list) {
-    
     if (begin_word == end_word)
         return vector<string>{};
 
-    unordered_map<int, vector<string>> words_by_length;
-    for (const auto &word : word_list) {
-        words_by_length[word.size()].push_back(word);
-    }
     queue<vector<string>> ladder_queue;
     ladder_queue.push({begin_word});
     set<string> visited;
     visited.insert(begin_word);
-
+    
     while (!ladder_queue.empty()) {
         vector<string> ladder = ladder_queue.front();
         ladder_queue.pop();
         string last_word = ladder.back();
-
-        vector<string> candidates;
-        for (size_t len = last_word.size() - 1; len <= last_word.size() + 1; len++) {
-            if (words_by_length.find(len) != words_by_length.end()) {
-                for (const auto &w : words_by_length[len]) {
-                    candidates.push_back(w);
-                }
-            }
-        }
-
+        
+        vector<string> candidates = get_candidates(last_word, word_list);
+        
         for (const string &word : candidates) {
             if (is_adjacent(last_word, word)) {
                 if (visited.find(word) == visited.end()) {
@@ -174,6 +178,5 @@ vector<string> generate_word_ladder(const string& begin_word, const string& end_
             }
         }
     }
-    
     return vector<string>();
 }
