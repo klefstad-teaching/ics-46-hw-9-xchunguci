@@ -1,5 +1,5 @@
 #include "ladder.h"
-
+#include <unordered_map>
 
 void error(string word1, string word2, string msg) {
   std::cout << word1 << " and " <<  word2 << " " << msg;
@@ -28,7 +28,7 @@ void print_word_ladder(const vector<string>& ladder) {
         return;
     }
     for (size_t i = 0; i < ladder.size(); i++) {
-        cout << ladder[i];
+        cout << ladder[i] << ' ';
     }
     cout << '\n';
 }
@@ -93,33 +93,40 @@ bool is_adjacent(const string& word1, const string& word2) {
 
 vector<string> generate_word_ladder(const string& begin_word, const string& end_word, const set<string>& word_list) {
     
-    if (begin_word == end_word) return vector<string>{begin_word};
+    if (begin_word == end_word)
+        return vector<string>{};
 
+    unordered_map<int, vector<string>> words_by_length;
+    for (const auto &word : word_list) {
+        words_by_length[word.size()].push_back(word);
+    }
     queue<vector<string>> ladder_queue;
-    
-
     ladder_queue.push({begin_word});
-    
     set<string> visited;
     visited.insert(begin_word);
-    
+
     while (!ladder_queue.empty()) {
         vector<string> ladder = ladder_queue.front();
         ladder_queue.pop();
-        
         string last_word = ladder.back();
-        
-        for (const string &word : word_list) {
+
+        vector<string> candidates;
+        for (size_t len = last_word.size() - 1; len <= last_word.size() + 1; len++) {
+            if (words_by_length.find(len) != words_by_length.end()) {
+                for (const auto &w : words_by_length[len]) {
+                    candidates.push_back(w);
+                }
+            }
+        }
+
+        for (const string &word : candidates) {
             if (is_adjacent(last_word, word)) {
                 if (visited.find(word) == visited.end()) {
                     visited.insert(word);
-                    
                     vector<string> new_ladder = ladder;
                     new_ladder.push_back(word);
-                    
-                    if (word == end_word) {
+                    if (word == end_word)
                         return new_ladder;
-                    }
                     ladder_queue.push(new_ladder);
                 }
             }
